@@ -41,14 +41,13 @@ The src folder within a package contains the .cpp files that define nodes and su
 
 The ROS2 packages currently in this project are as follows:
 * [Autonomy](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/autonomy)
-* [Communication](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/communication)
+* [Communication](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/communication2)
 * [Excavation](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/excavation)
-* [Linear](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/linear)
 * [Logic](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/logic)
 * [Falcon](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/falcon)
 * [Power Distribution Panel](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/power_distribution_panel)
 * [Talon](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/talon)
-* [Zed Tracking](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/zed_tracking)
+* [Zed Tracking](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/zed)
 
 ## Documentation
 This project uses [Doxygen](https://www.doxygen.nl/index.html) to generate documentation for the files automatically.  **To make documentation easier for all users, Doxygen is hosted on the Github and does not need to be downloaded by contributers.**  To learn more about the Doxygen formatting, please refer to the [Documenting the code](https://www.doxygen.nl/manual/docblocks.html) section of the Doxygen docs.  The documentation for this project can be found at the project website that is found [here](https://razorbotz.github.io/ROS2/).
@@ -80,10 +79,10 @@ To gain a better understanding of ROS2, please refer to the following [tutorials
 * [Creating a Package](https://docs.ros.org/en/foxy/Tutorials/Creating-Your-First-ROS2-Package.html)
 * [Writing a Simple Publisher and Subscriber (C++)](https://docs.ros.org/en/foxy/Tutorials/Writing-A-Simple-Cpp-Publisher-And-Subscriber.html)
 * [Writing a Simple Publisher and Subscriber (Python)](https://docs.ros.org/en/foxy/Tutorials/Writing-A-Simple-Py-Publisher-And-Subscriber.html)
-* [Writing Custom ROS2 msg Files](https://docs.ros.org/en/foxy/Tutorials/Custom-ROS2-Interfaces.html)
+* [Writing Custom ROS2 msg Files](https://docs.ros.org/en/foxy/Tutorials/Beginner-Client-Libraries/Custom-ROS2-Interfaces.html)
 * [Using Parameters in a Class (C++)](https://docs.ros.org/en/foxy/Tutorials/Using-Parameters-In-A-Class-CPP.html)
 * [Using Parameters in a Class (Python)](https://docs.ros.org/en/foxy/Tutorials/Using-Parameters-In-A-Class-Python.html)
-* [Using ROS2 Launch](https://docs.ros.org/en/foxy/Tutorials/Launch-Files/Using-ROS2-Launch-For-Large-Projects.html)
+* [Using ROS2 Launch](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Launch/Creating-Launch-Files.html)
 
 ## Resources
 General Reference Material: 
