@@ -174,6 +174,29 @@ void stopExcavation(){
     dumpBinSpeedPublisher->publish(speed);
 }
 
+// TODO: Write tests for this to ensure the logic is sound
+/**
+ * @brief  Function to transform the joystick input
+ * 
+ * This function is called to transform the joystick input 
+ * into a slightly modified version.  Because the joystick
+ * doesn't go to exactly zero, there will always be data
+ * published to the robot, causing it to drift slightly.  
+ * This function zeroes the input in the range
+ * [-deadZone, deadZone] to prevent this.
+ * 
+ * @param info - Float value of the joystick axis
+ * @param deadZone - Float value of the deadzone of the joystick
+ * @return float 
+ */
+float transformJoystickInfo(float info, float deadZone){
+    float transformed = (fabs(info) < deadZone) ? 0.0 : info;
+    transformed = (transformed > 0) ? transformed - deadZone : transformed;
+    transformed = (transformed < 0) ? transformed + deadZone : transformed;
+    return transformed;
+}
+
+
 /** @brief Callback function for joystick axis topic
  * 
  * This function is called when the node receives the
@@ -189,29 +212,35 @@ void joystickAxisCallback(const messages::msg::AxisState::SharedPtr axisState){
     //RCLCPP_INFO(nodeHandle->get_logger(),"Axis %d %f %f %f %f", axisState->joystick, axisState->state0, axisState->state1, axisState->state2, axisState->state3);
     float deadZone = 0.1;
     if(axisState->axis==0){
-        joystick1Roll = -axisState->state;
-        joystick1Roll = (fabs(joystick1Roll)<deadZone)? 0.0 : joystick1Roll;
-        joystick1Roll = (joystick1Roll>0)?joystick1Roll-deadZone:joystick1Roll;
-        joystick1Roll = (joystick1Roll<0)?joystick1Roll+deadZone:joystick1Roll;
+        joystick1Roll = transformJoystickInfo(-axisState->state, deadZone);
+        
+        //joystick1Roll = -axisState->state;
+        //joystick1Roll = (fabs(joystick1Roll)<deadZone)? 0.0 : joystick1Roll;
+        //joystick1Roll = (joystick1Roll>0)?joystick1Roll-deadZone:joystick1Roll;
+        //joystick1Roll = (joystick1Roll<0)?joystick1Roll+deadZone:joystick1Roll;
 
         if(!excavationGo)
             updateSpeed();
     }
     else if(axisState->axis==1){
-        joystick1Pitch = axisState->state;
-        joystick1Pitch = (fabs(joystick1Pitch)<deadZone)? 0.0 : joystick1Pitch;
-        joystick1Pitch = (joystick1Pitch>0)?joystick1Pitch-deadZone:joystick1Pitch;
-        joystick1Pitch = (joystick1Pitch<0)?joystick1Pitch+deadZone:joystick1Pitch;
+        joystick1Pitch = transformJoystickInfo(axisState->state, deadZone);
+        
+        //joystick1Pitch = axisState->state;
+        //joystick1Pitch = (fabs(joystick1Pitch)<deadZone)? 0.0 : joystick1Pitch;
+        //joystick1Pitch = (joystick1Pitch>0)?joystick1Pitch-deadZone:joystick1Pitch;
+        //joystick1Pitch = (joystick1Pitch<0)?joystick1Pitch+deadZone:joystick1Pitch;
         if(excavationGo)
             updateExcavation();
         else
             updateSpeed();
     }
     else if(axisState->axis==2){
-        joystick1Yaw = axisState->state;
-        joystick1Yaw = (fabs(joystick1Yaw)<deadZone)? 0.0 : joystick1Yaw;
-        joystick1Yaw = (joystick1Yaw>0)?joystick1Yaw-deadZone : joystick1Yaw;
-        joystick1Yaw = (joystick1Yaw < 0) ? joystick1Yaw + deadZone : joystick1Yaw;
+        joystick1Yaw = transformJoystickInfo(axisState->state, deadZone);
+        
+        //joystick1Yaw = axisState->state;
+        //joystick1Yaw = (fabs(joystick1Yaw)<deadZone)? 0.0 : joystick1Yaw;
+        //joystick1Yaw = (joystick1Yaw>0)?joystick1Yaw-deadZone : joystick1Yaw;
+        //joystick1Yaw = (joystick1Yaw < 0) ? joystick1Yaw + deadZone : joystick1Yaw;
         if(excavationGo)
             updateExcavation();
     }

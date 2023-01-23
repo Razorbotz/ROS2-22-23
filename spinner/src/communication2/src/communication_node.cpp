@@ -37,8 +37,29 @@
 #define PORT 31337
 
 /** @file
- * @brief Brief description of file
- * Detailed description of file 
+ * @brief Node for handling communication between the client and the rover.
+ *  
+ * This node receives information published by the power_distribution_panel node, motor nodes, and the logic node
+ * wraps the information into topics, then publishes the topics.  
+ * Currently this node is missing the callback functions for the motors. 
+ * The topics that the node subscribes to are as follows:
+ * \li \b power
+ * \li \b talon_14_info
+ * \li \b talon_15_info
+ * \li \b zed_position
+ * \li \b zed_image
+ * 
+ * The topics that are being published are as follows:
+ * \li \b joystick_axis
+ * \li \b joystick_button
+ * \li \b joystick_hat
+ * \li \b key
+ * \li \b STOP
+ * \li \b GO
+ * 
+ * To read more about the nodes that subscribe to this one
+ * \see logic_node.cpp
+ * 
  * 
  * */
 
@@ -47,8 +68,9 @@ bool silentRunning=true;
 int new_socket;
 rclcpp::Node::SharedPtr nodeHandle;
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Inserts topic into a payload to be sent.
+ * 
+ * Takes a float topic and an array and stores a byte represenation of the topic.
  * @param array
  * @return void
  * */
@@ -59,8 +81,9 @@ void insert(float value,uint8_t* array){
     array[3]=uint8_t((uint32_t(*(static_cast<uint32_t*>(static_cast<void*>(&value))))>>0) & 0xff);
 }
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Inserts topic into a payload to be sent.
+ * 
+ * Takes an int topic and an array and stores a byte represenation of the topic.
  * @param array
  * @return void
  * */
@@ -71,8 +94,8 @@ void insert(int value, uint8_t* array){
     array[3]=uint8_t((uint32_t(*(static_cast<uint32_t*>(static_cast<void*>(&value))))>>0) & 0xff);
 }
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Parse a byte represenation into a float.
+ * 
  * @param array
  * @return value
  * */
@@ -87,8 +110,8 @@ float parseFloat(uint8_t* array){
     return value;
 }
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Parse a byte represenation into an int.
+ * 
  * @param array
  * @return value
  * */
@@ -184,6 +207,13 @@ void send(std::string messageLabel, const messages::msg::Power::SharedPtr power)
 }
 
 
+/** @brief Callback function that publishes position data to the client
+ * 
+ * This function is called when the node receives position data from the
+ * autonomy node.  This data is then published to the client to be displayed
+ * on the GUI. 
+ * @param zedPosition 
+ */
 void zedPositionCallback(const messages::msg::ZedPosition::SharedPtr zedPosition){
     if(silentRunning)return;
     BinaryMessage message("Zed");
@@ -198,8 +228,14 @@ void zedPositionCallback(const messages::msg::ZedPosition::SharedPtr zedPosition
     send(message);
 }
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Callback function for the power topic.
+ * 
+ * This function is called when the node receives a
+ * topic with the name power. This function
+ * extracts the information given from the power topic
+ * and places data into a payload to be sent.
+ *  
+ * \see .power_distribution_panel.cpp
  * @param power
  * @return void
  * */
@@ -208,8 +244,11 @@ void powerCallback(const messages::msg::Power::SharedPtr power){
     send("Power",power);
 }
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Callback function for the Talon topic
+ * 
+ * This function receives the talonOut message published by the first 
+ * Talon and uses the send function to send the data to the client side
+ * GUI.
  * @param talonOut
  * @return void
  * */
@@ -218,8 +257,11 @@ void talon1Callback(const messages::msg::TalonOut::SharedPtr talonOut){
     send("Talon 1",talonOut);
 }
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Callback function for the Talon topic
+ * 
+ * This function receives the talonOut message published by the first 
+ * Talon and uses the send function to send the data to the client side
+ * GUI.
  * @param talonOut
  * @return void
  * */
@@ -228,23 +270,47 @@ void talon2Callback(const messages::msg::TalonOut::SharedPtr talonOut){
     send("Talon 2",talonOut);
 }
 
+/** @brief Callback function for the Talon topic
+ * 
+ * This function receives the talonOut message published by the first 
+ * Talon and uses the send function to send the data to the client side
+ * GUI.
+ * @param talonOut
+ * @return void
+ * */
 void talon3Callback(const messages::msg::TalonOut::SharedPtr talonOut){
     //RCLCPP_INFO(nodeHandle->get_logger(), "talon3 callback");
     send("Talon 3",talonOut);
 }
 
+/** @brief Callback function for the Talon topic
+ * 
+ * This function receives the talonOut message published by the first 
+ * Talon and uses the send function to send the data to the client side
+ * GUI.
+ * @param talonOut
+ * @return void
+ * */
 void talon4Callback(const messages::msg::TalonOut::SharedPtr talonOut){
     //RCLCPP_INFO(nodeHandle->get_logger(), "talon4 callback");
     send("Talon 4",talonOut);
 }
 
-
+/** @brief Receives the ZED camera image
+ * 
+ * This function hasn't been fully implemented yet.  In the future, this
+ * will send the received image to the client-side GUI.
+ * @param inputImage 
+ */
 void zedImageCallback(const sensor_msgs::msg::Image::SharedPtr inputImage){
     RCLCPP_INFO(nodeHandle->get_logger(), "Received image");
 }
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Returns the address string of the rover.
+ * 
+ * This function is called when the node
+ * tries to setup the socket connection between the rover and client. This function
+ * returns the address as a string.
  * @param family
  * @param interfaceName
  * @return addressString
@@ -283,8 +349,8 @@ std::string getAddressString(int family, std::string interfaceName){
 }
 
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Prints the address
+ * 
  * */
 void printAddresses() {
     printf("Addresses\n");
@@ -324,8 +390,8 @@ void printAddresses() {
     printf("Done\n");
 }
 
-/** @brief Brief description of function
- * Detailed description of function
+/** @brief Reboots the rover. 
+ *
  * */
 void reboot(){
     sync();
@@ -334,8 +400,13 @@ void reboot(){
 
 std::string robotName="unnamed";
 bool broadcast=true;
-/** @brief Brief description of function
- * Detailed description of function
+
+/** @brief Creates socketDescriptor for socket connection.
+ * 
+ * This function is called when the node
+ * tries to setup the socket connection between the rover and client.
+ * This function creates the socketDescriptor for the socket connection.
+ * Uses the getAddressString function.
  * */
 void broadcastIP(){
     while(true){
@@ -473,8 +544,14 @@ int main(int argc, char **argv){
                 messageBytesList.pop_front();
             }
             //parse command
+            // Command values:
+            // 1: Joystick axis values
+            // 2: Keystate values
+            // 5: Joystick button values
+            // 6: Joystick hat values
+            // 7: GUI silent running button
+            // 8: GUI reboot button
             uint8_t command=message[0];
-
             if(command==1){
                 messages::msg::AxisState axisState;
                 axisState.joystick=message[1];
@@ -483,7 +560,6 @@ int main(int argc, char **argv){
 		joystickAxisPublisher->publish(axisState);
 		//RCLCPP_INFO(nodeHandle->get_logger(),"axis %d %d %f ", axisState.joystick, axisState.axis , axisState.state);
             }
-
             if(command==2){
                 messages::msg::KeyState keyState;
                 keyState.key=((uint16_t)message[1])<<8 | ((uint16_t)message[2]);
@@ -491,7 +567,6 @@ int main(int argc, char **argv){
                 keyPublisher->publish(keyState);
 		//RCLCPP_INFO(nodeHandle->get_logger(),"key %d %d ", keyState.key , keyState.state);
             }
-
             if(command==5){
                 messages::msg::ButtonState buttonState;
                 buttonState.joystick=message[1];
