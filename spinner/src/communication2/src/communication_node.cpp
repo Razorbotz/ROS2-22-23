@@ -557,15 +557,15 @@ int main(int argc, char **argv){
                 axisState.joystick=message[1];
                 axisState.axis=message[2];
                 axisState.state=parseFloat(&message[3]);
-		joystickAxisPublisher->publish(axisState);
-		//RCLCPP_INFO(nodeHandle->get_logger(),"axis %d %d %f ", axisState.joystick, axisState.axis , axisState.state);
+		        joystickAxisPublisher->publish(axisState);
+		        //RCLCPP_INFO(nodeHandle->get_logger(),"axis %d %d %f ", axisState.joystick, axisState.axis , axisState.state);
             }
             if(command==2){
                 messages::msg::KeyState keyState;
                 keyState.key=((uint16_t)message[1])<<8 | ((uint16_t)message[2]);
                 keyState.state=message[3];
                 keyPublisher->publish(keyState);
-		//RCLCPP_INFO(nodeHandle->get_logger(),"key %d %d ", keyState.key , keyState.state);
+		        //RCLCPP_INFO(nodeHandle->get_logger(),"key %d %d ", keyState.key , keyState.state);
             }
             if(command==5){
                 messages::msg::ButtonState buttonState;
@@ -581,7 +581,7 @@ int main(int argc, char **argv){
                     goPublisher->publish(empty);
                 }    
                 joystickButtonPublisher->publish(buttonState);
-		//RCLCPP_INFO(nodeHandle->get_logger(),"button %d %d %d", buttonState.joystick , buttonState.button , buttonState.state);
+		        //RCLCPP_INFO(nodeHandle->get_logger(),"button %d %d %d", buttonState.joystick , buttonState.button , buttonState.state);
             }
             if(command==6){
                 messages::msg::HatState hatState;
@@ -589,7 +589,7 @@ int main(int argc, char **argv){
                 hatState.hat=message[2];
                 hatState.state=message[3];
                 joystickHatPublisher->publish(hatState);
-		//RCLCPP_INFO(nodeHandle->get_logger(),"hat %d %d %d", hatState.joystick , hatState.hat , hatState.state);
+		        //RCLCPP_INFO(nodeHandle->get_logger(),"hat %d %d %d", hatState.joystick , hatState.hat , hatState.state);
             }
             if(command==7){
                 silentRunning=message[1];

@@ -100,9 +100,6 @@ void updateSpeed(){
     
     std_msgs::msg::Float32 speedLeft;
     std_msgs::msg::Float32 speedRight;
-    //Might need to lower this due to very low gear ratio
-    //Estimated max speed for motors is roughly 1000 rpm
-    //with an 8:1 gear ratio
     float maxSpeed = 1.0;
     
     //Linear transformation of cordinate planes
@@ -213,22 +210,13 @@ void joystickAxisCallback(const messages::msg::AxisState::SharedPtr axisState){
     float deadZone = 0.1;
     if(axisState->axis==0){
         joystick1Roll = transformJoystickInfo(-axisState->state, deadZone);
-        
-        //joystick1Roll = -axisState->state;
-        //joystick1Roll = (fabs(joystick1Roll)<deadZone)? 0.0 : joystick1Roll;
-        //joystick1Roll = (joystick1Roll>0)?joystick1Roll-deadZone:joystick1Roll;
-        //joystick1Roll = (joystick1Roll<0)?joystick1Roll+deadZone:joystick1Roll;
 
         if(!excavationGo)
             updateSpeed();
     }
     else if(axisState->axis==1){
         joystick1Pitch = transformJoystickInfo(axisState->state, deadZone);
-        
-        //joystick1Pitch = axisState->state;
-        //joystick1Pitch = (fabs(joystick1Pitch)<deadZone)? 0.0 : joystick1Pitch;
-        //joystick1Pitch = (joystick1Pitch>0)?joystick1Pitch-deadZone:joystick1Pitch;
-        //joystick1Pitch = (joystick1Pitch<0)?joystick1Pitch+deadZone:joystick1Pitch;
+
         if(excavationGo)
             updateExcavation();
         else
@@ -236,11 +224,7 @@ void joystickAxisCallback(const messages::msg::AxisState::SharedPtr axisState){
     }
     else if(axisState->axis==2){
         joystick1Yaw = transformJoystickInfo(axisState->state, deadZone);
-        
-        //joystick1Yaw = axisState->state;
-        //joystick1Yaw = (fabs(joystick1Yaw)<deadZone)? 0.0 : joystick1Yaw;
-        //joystick1Yaw = (joystick1Yaw>0)?joystick1Yaw-deadZone : joystick1Yaw;
-        //joystick1Yaw = (joystick1Yaw < 0) ? joystick1Yaw + deadZone : joystick1Yaw;
+
         if(excavationGo)
             updateExcavation();
     }
@@ -257,8 +241,7 @@ void joystickAxisCallback(const messages::msg::AxisState::SharedPtr axisState){
  * topic with the name joystick_button.  Button 2 
  * toggles the drive and excavation states while
  * button 3 inverts the direction of the drum.  
- * Buttons 6 and 7 control the locking servo and 
- * buttons 8 and 9 control the arm servo.
+ * Buttons 6 and 7 control the locking servo.
  * @param buttonState \see ButtonState.msg
  * @return void
  * */
