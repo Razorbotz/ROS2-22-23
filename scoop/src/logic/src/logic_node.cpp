@@ -53,6 +53,8 @@ float joystick1Pitch=0;
 float joystick1Yaw=0;
 float joystick1Throttle=0;
 
+float maxSpeed=0.1;
+
 bool automationGo=false;
 bool invertDrum = false;
 bool excavationGo = false;
@@ -100,7 +102,6 @@ void updateSpeed(){
     
     std_msgs::msg::Float32 speedLeft;
     std_msgs::msg::Float32 speedRight;
-    float maxSpeed = 1.0;
     
     //Linear transformation of cordinate planes
     speedLeft.data  = (joystick1Pitch + joystick1Roll);
@@ -171,7 +172,6 @@ void stopExcavation(){
     dumpBinSpeedPublisher->publish(speed);
 }
 
-// TODO: Write tests for this to ensure the logic is sound
 /**
  * @brief  Function to transform the joystick input
  * 
@@ -207,6 +207,9 @@ float transformJoystickInfo(float info, float deadZone){
 void joystickAxisCallback(const messages::msg::AxisState::SharedPtr axisState){
     //RCLCPP_INFO(nodeHandle->get_logger(),"Axis %d %d %f", axisState->joystick, axisState->axis, axisState->state);
     //RCLCPP_INFO(nodeHandle->get_logger(),"Axis %d %f %f %f %f", axisState->joystick, axisState->state0, axisState->state1, axisState->state2, axisState->state3);
+    if(automationGo)
+        automationGo = false;
+    
     float deadZone = 0.1;
     if(axisState->axis==0){
         joystick1Roll = transformJoystickInfo(-axisState->state, deadZone);
@@ -322,12 +325,37 @@ void joystickHatCallback(const messages::msg::HatState::SharedPtr hatState){
     }
 }
 
+/** @brief Function to update max speed multiplier
+ * 
+ * This function is called when the keyCallback
+ * function receives either a '+' or '-' keypress
+ * event.  A delta speed value is then passed to
+ * this function to change the value of the max
+ * speed multiplier dynamically, instead of the 
+ * user recompiling the code and reexecuting it.
+ * @param deltaSpeed - Amount to change max speed
+ * @return void
+ * */
+void updateMaxSpeed(float deltaSpeed){
+    maxSpeed += deltaSpeed;
+    if(maxSpeed <= 0){
+        maxSpeed = 0.1;
+    }
+    if(maxSpeed > 1){
+        maxSpeed = 1;
+    }
+    RCLCPP_INFO(nodeHandle->get_logger(), "maxSpeed: %f", maxSpeed);
+}
+
 /** @brief Callback function for the keys
  * 
  * This function is called when the node receives a
  * topic with the name key_state.  It currently prints
  * the key pressed to the screen and inverts  
- * @arg automationGo if the key is 's'.
+ * @arg automationGo if the key is 's'.  This function
+ * also increases the max speed multiplier when the '+'
+ * key is pressed and decreases it when the '-' key is 
+ * pressed.
  * @param keyState \see KeyState.msg
  * @return void
  * */
@@ -336,8 +364,14 @@ void keyCallback(const messages::msg::KeyState::SharedPtr keyState){
 
     if(keyState->key==115 && keyState->state==1){
         automationGo= !automationGo;
+        RCLCPP_INFO(nodeHandle->get_logger(), "Automation invert.  Current state: %d", automationGo);
     }
-    RCLCPP_INFO(nodeHandle->get_logger(), "Automation invert.  Current state: %d", automationGo);
+    if(keyState->key==45 && keyState->state==1){
+        updateMaxSpeed(0.1);
+    }
+    if(keyState->key==43 && keyState->state==1){
+        updateMaxSpeed(-0.1);
+    }
 }
 
 /** @brief Callback function for the zedPosition

@@ -49,6 +49,13 @@ The ROS2 packages currently in this project are as follows:
 * [Talon](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/talon)
 * [Zed Tracking](https://github.com/Razorbotz/ROS2/tree/master/spinner/src/zed)
 
+
+The Autonomy node is no longer used or under active development.  The functionality of the Autonomy node has been moved to the Logic node.  The 2021-2022 node relationships are shown in the image below.
+
+![Node Relationship Visual](docs/images/Nodes.svg)
+
+The Talon and Falcon nodes have been combined into a single instance on the image to reduce the complexity and make it easier to understand.  The message names that are passed from each node are shown.  All motor controller nodes, ie Talon, Falcon, and Exavation nodes, also subscribe to two publishers from the communication node that are called the GO and STOP publishers.  These subscriptions were omitted from the diagram for the sake of clarity.
+
 ## Documentation
 This project uses [Doxygen](https://www.doxygen.nl/index.html) to generate documentation for the files automatically.  **To make documentation easier for all users, Doxygen is hosted on the Github and does not need to be downloaded by contributers.**  To learn more about the Doxygen formatting, please refer to the [Documenting the code](https://www.doxygen.nl/manual/docblocks.html) section of the Doxygen docs.  The documentation for this project can be found at the project website that is found [here](https://razorbotz.github.io/ROS2/).
 
