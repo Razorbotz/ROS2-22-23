@@ -19,7 +19,7 @@ def generate_launch_description():
             name='communication2',
             executable='communication2_node',
             parameters=[
-                {"robot_name": "Spinner"}
+                {"robot_name": "Scoop"}
             ],
             output={'stderr': 'screen', 'stdout': 'screen'}
         )

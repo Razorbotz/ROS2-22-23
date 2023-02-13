@@ -4,8 +4,8 @@
 
 class Automation1 : public Automation{
 
-    enum RobotState{LOCATE,GO_TO_DIG_SITE,DIG,HOME,DOCK,DUMP};
-    RobotState robotState=DUMP;
+    enum RobotState{LOCATE,ALIGN,GO_TO_DIG_SITE,DIG,GO_TO_HOME,DOCK,DUMP,RETURN_TO_START};
+    RobotState robotState=LOCATE;
     Location destination;
 
     void automate();

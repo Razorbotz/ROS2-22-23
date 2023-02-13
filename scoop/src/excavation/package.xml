@@ -1,17 +1,22 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>excavation</name>
-  <version>0.0.0</version>
-  <description>Excavation node</description>
-  <maintainer email="andrewburroughs17@gmail.com">team</maintainer>
-  <license>TODO: License declaration</license>
-  <exec_depend>rclpy</exec_depend>
+  <version>1.0.0</version>
+  <description>The excavation package</description>
+  <maintainer email="andrewburroughs17@gmail.com">Andrew Burroughs</maintainer>
+  <author>Andrew Burroughs</author>
+  <license>none</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>messages</depend>
+  <build_depend>rclcpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <exec_depend>rclcpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <exec_depend>odrive</exec_depend>
-  <exec_depend>fibre</exec_depend>
 
   <export>
-    <build_type>ament_python</build_type>
+  <build_type>ament_cmake</build_type>
   </export>
 </package>

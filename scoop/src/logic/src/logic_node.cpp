@@ -57,17 +57,11 @@ float maxSpeed=0.1;
 
 bool automationGo=false;
 bool invertDrum = false;
-bool excavationGo = false;
 
 Automation* automation=new Automation1();
 
 std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > driveLeftSpeedPublisher;
 std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > driveRightSpeedPublisher;
-std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > dumpBinSpeedPublisher;
-std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > shoulderSpeedPublisher;
-std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > excavationArmPublisher;
-std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > excavationDrumPublisher;
-std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool_<std::allocator<void> >, std::allocator<void> > > servoStatePublisher;
 
 /** @brief Function to initialize the motors to zero
  * 
@@ -83,10 +77,6 @@ void initSetSpeed(){
     
     driveLeftSpeedPublisher->publish(speed);
     driveRightSpeedPublisher->publish(speed);
-    dumpBinSpeedPublisher->publish(speed);
-    shoulderSpeedPublisher->publish(speed);
-    excavationArmPublisher->publish(speed);
-    excavationDrumPublisher->publish(speed);
     //RCLCPP_INFO(nodeHandle->get_logger(), "Set init motor speeds to 0.0");
 }
 
@@ -141,17 +131,7 @@ void stopSpeed(){
  * @return void
  * */
 void updateExcavation(){
-     RCLCPP_INFO(nodeHandle->get_logger(), "armSpeed: %f", joystick1Yaw);
-     RCLCPP_INFO(nodeHandle->get_logger(), "drumSpeed: %f", joystick1Throttle);
-     std_msgs::msg::Float32 shoulderSpeed;
-     shoulderSpeed.data = -joystick1Pitch;
-     shoulderSpeedPublisher->publish(shoulderSpeed);
-     std_msgs::msg::Float32 armSpeed;
-     armSpeed.data = joystick1Yaw;
-     excavationArmPublisher->publish(armSpeed);
-     std_msgs::msg::Float32 drumSpeed;
-     drumSpeed.data = (invertDrum)? -joystick1Throttle : joystick1Throttle;
-     excavationDrumPublisher->publish(drumSpeed);
+
 }
 
 /** @brief Function to stop excavation motors
@@ -166,10 +146,6 @@ void updateExcavation(){
 void stopExcavation(){
     std_msgs::msg::Float32 speed;
     speed.data = 0.0;
-    shoulderSpeedPublisher->publish(speed);
-    excavationArmPublisher->publish(speed);
-    excavationDrumPublisher->publish(speed);
-    dumpBinSpeedPublisher->publish(speed);
 }
 
 /**
@@ -213,28 +189,17 @@ void joystickAxisCallback(const messages::msg::AxisState::SharedPtr axisState){
     float deadZone = 0.1;
     if(axisState->axis==0){
         joystick1Roll = transformJoystickInfo(-axisState->state, deadZone);
-
-        if(!excavationGo)
-            updateSpeed();
     }
     else if(axisState->axis==1){
         joystick1Pitch = transformJoystickInfo(axisState->state, deadZone);
-
-        if(excavationGo)
-            updateExcavation();
-        else
-            updateSpeed();
+        updateSpeed();
     }
     else if(axisState->axis==2){
         joystick1Yaw = transformJoystickInfo(axisState->state, deadZone);
 
-        if(excavationGo)
-            updateExcavation();
     }
     else if(axisState->axis==3){
         joystick1Throttle = axisState->state/2 + 0.5;
-        if(excavationGo)
-            updateExcavation();
     }
 }
 
@@ -259,32 +224,19 @@ void joystickButtonCallback(const messages::msg::ButtonState::SharedPtr buttonSt
             break;
         case 1: //toggles driving and digging
             if(buttonState->state){
-                excavationGo = !excavationGo;
-                if(!excavationGo)
-                    stopExcavation();
-                else
-                    stopSpeed();
+                stopSpeed();
             }
             RCLCPP_INFO(nodeHandle->get_logger(), "Button 2");
             break;
         case 2:
-            if(buttonState->state)
-                invertDrum = !invertDrum;
-            RCLCPP_INFO(nodeHandle->get_logger(), "Button 3 invertDrum: %d", invertDrum);
             break;
         case 3:
             break;
         case 4:
             break;
         case 5:
-            state.data = true;
-            servoStatePublisher->publish(state);
-            RCLCPP_INFO(nodeHandle->get_logger(), "Button 5 pressed");
             break;
         case 6:
-            state.data = false;
-            servoStatePublisher->publish(state);
-            RCLCPP_INFO(nodeHandle->get_logger(), "Button 6 pressed");
             break;
         case 7:
             break;
@@ -310,19 +262,6 @@ void joystickButtonCallback(const messages::msg::ButtonState::SharedPtr buttonSt
 void joystickHatCallback(const messages::msg::HatState::SharedPtr hatState){
     std::cout << "Hat " << (int)hatState->joystick << " " << (int)hatState->hat << " " << (int)hatState->state << std::endl;
 
-    std_msgs::msg::Float32 dumpSpeed;
-    if((int)hatState->state == 1 ){
-	dumpSpeed.data=1.0;
-        dumpBinSpeedPublisher->publish(dumpSpeed);
-    }
-    if((int)hatState->state == 4 ){
-	dumpSpeed.data=-1.0;
-        dumpBinSpeedPublisher->publish(dumpSpeed);
-    }
-    if((int)hatState->state == 0 ){
-	dumpSpeed.data=0.0;
-        dumpBinSpeedPublisher->publish(dumpSpeed);
-    }
 }
 
 /** @brief Function to update max speed multiplier
@@ -428,12 +367,6 @@ int main(int argc, char **argv){
     
     driveLeftSpeedPublisher= nodeHandle->create_publisher<std_msgs::msg::Float32>("drive_left_speed",1);
     driveRightSpeedPublisher= nodeHandle->create_publisher<std_msgs::msg::Float32>("drive_right_speed",1);
-    //driveStatePublisher= nodeHandle->create_publisher<std_msgs::msg::Bool>("drive_state",1);
-    dumpBinSpeedPublisher= nodeHandle->create_publisher<std_msgs::msg::Float32>("dump_bin_speed",1);
-    shoulderSpeedPublisher = nodeHandle->create_publisher<std_msgs::msg::Float32>("shoulder_speed",1);
-    excavationArmPublisher = nodeHandle->create_publisher<std_msgs::msg::Float32>("excavationArm",1);
-    excavationDrumPublisher = nodeHandle->create_publisher<std_msgs::msg::Float32>("excavationDrum",1);
-    servoStatePublisher = nodeHandle->create_publisher<std_msgs::msg::Bool>("servo_state", 1);
 
     initSetSpeed();
 

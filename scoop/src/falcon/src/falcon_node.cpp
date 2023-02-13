@@ -286,34 +286,7 @@ int main(int argc,char** argv){
 			talonOut.error_derivative=errorDerivative0;
 
 			talonOutPublisher->publish(talonOut);
-
-/*            		deviceID=talonFX2->GetDeviceID();
-			busVoltage=talonFX2->GetBusVoltage();
-			outputCurrent=talonFX2->GetOutputCurrent();
-			isInverted=talonFX2->GetInverted();
-			motorOutputVoltage=talonFX2->GetMotorOutputVoltage();
-			motorOutputPercent=talonFX2->GetMotorOutputPercent();
-			temperature=talonFX2->GetTemperature();
-			sensorPosition0=talonFX2->GetSelectedSensorPosition(0);
-			sensorVelocity0=talonFX2->GetSelectedSensorVelocity(0);
-			closedLoopError0=talonFX2->GetClosedLoopError(0);
-			integralAccumulator0=talonFX2->GetIntegralAccumulator(0);
-			errorDerivative0=talonFX2->GetErrorDerivative(0);
-		
-			talonOut.device_id=deviceID;	
-			talonOut.bus_voltage=busVoltage;
-			talonOut.output_current=outputCurrent;
-			talonOut.output_voltage=motorOutputVoltage;
-			talonOut.output_percent=motorOutputPercent;
-			talonOut.temperature=temperature;
-			talonOut.sensor_position=sensorPosition0;
-			talonOut.sensor_velocity=sensorVelocity0;
-			talonOut.closed_loop_error=closedLoopError0;
-			talonOut.integral_accumulator=integralAccumulator0;
-			talonOut.error_derivative=errorDerivative0;
-
-			talonOutPublisher->publish(talonOut);*/
-  		        start = std::chrono::high_resolution_clock::now();
+			start = std::chrono::high_resolution_clock::now();
 
 		}
 
