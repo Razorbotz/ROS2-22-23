@@ -24,7 +24,7 @@ PowerDistributionPanel::PowerDistributionPanel(){
  * @return currentC[source]
  * */
 float PowerDistributionPanel::getCurrent(int source){
-	return currentC[source];
+	return currentA[source];
 }
 
 /** @brief Brief description of function
@@ -63,6 +63,10 @@ float PowerDistributionPanel::getVoltage(){
 	return voltage;
 }
 
+float PowerDistributionPanel::getTemperature(){
+	return temperature;
+}
+
 /** @brief Brief description of function
  * Detailed description of function
  * @param frame
@@ -72,6 +76,7 @@ void PowerDistributionPanel::parseFrame(struct can_frame frame){
 
         if(frame.can_id==0x88041481 || frame.can_id==0x88041541 || frame.can_id==0x88041601){
 		parseVoltage(frame);
+		parseTemperature(frame);
 	}
 	
 	if(frame.can_id==0x88041401||
@@ -101,6 +106,11 @@ void PowerDistributionPanel::parseVoltage(struct can_frame frame){
         }
 }
 
+void PowerDistributionPanel::parseTemperature(struct can_frame frame){
+	if(frame.can_id==0x88041481 || frame.can_id==0x88041541 || frame.can_id==0x88041601){
+		this->temperature = 1.03250836957542 * frame.data[7] - 67.8564500484966;
+        }
+}
 /** @brief Brief description of function
  * Detailed description of function
  * @param frame

@@ -6,6 +6,7 @@ class PowerDistributionPanel{
 
 	private:
 		float voltage;
+		float temperature;
 		float currentA[15];
 		float currentB[15];
 		float currentC[15];
@@ -17,7 +18,9 @@ class PowerDistributionPanel{
 		float getCurrentB(int source);
 		float getCurrentC(int source);
 		float getVoltage();
+		float getTemperature();
 		void parseFrame(struct can_frame);	
 		void parseVoltage(struct can_frame frame);
+		void parseTemperature(struct can_frame frame);
 		void parseCurrent(struct can_frame frame);
 };
