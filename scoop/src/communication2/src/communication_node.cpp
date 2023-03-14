@@ -31,6 +31,8 @@
 #include <messages/msg/talon_out.hpp>
 #include <messages/msg/victor_out.hpp>
 #include <messages/msg/zed_position.hpp>
+#include <messages/msg/linear_out.hpp>
+#include <messages/msg/neo_out.hpp>
 
 #include <BinaryMessage.hpp>
 
@@ -127,7 +129,6 @@ int parseInt(uint8_t* array){
 }
 
  
-
 void send(BinaryMessage message){
     //RCLCPP_INFO(nodeHandle->get_logger(), "send message");
     std::shared_ptr<std::list<uint8_t>> byteList = message.getBytes();
@@ -172,7 +173,7 @@ void send(std::string messageLabel, const messages::msg::TalonOut::SharedPtr tal
     message.addElementFloat32("Temperature",talonOut->temperature);
     message.addElementFloat32("Sensor Position",talonOut->sensor_position);
     message.addElementFloat32("Sensor Velocity",talonOut->sensor_velocity);
-    message.addElementFloat32("closed Loop Error",talonOut->closed_loop_error);
+    message.addElementFloat32("Closed Loop Error",talonOut->closed_loop_error);
     message.addElementFloat32("Integral Accumulator",talonOut->integral_accumulator);
     message.addElementFloat32("Error Derivative",talonOut->error_derivative);
 
@@ -202,6 +203,36 @@ void send(std::string messageLabel, const messages::msg::Power::SharedPtr power)
     message.addElementFloat32("Current 13",power->current13);
     message.addElementFloat32("Current 14",power->current14);
     message.addElementFloat32("Current 15",power->current15);
+
+    send(message);
+}
+
+
+void send(std::string messageLabel, const messages::msg::LinearOut::SharedPtr linear){
+    if(silentRunning)return;
+
+    BinaryMessage message(messageLabel);
+
+    message.addElementFloat32("Speed", linear->speed);
+    message.addElementInt32("Potentiometer", linear->potentiometer);
+    message.addElementInt32("Time Without Change", linear->time_without_change);
+    message.addElementInt32("Max", linear->max);
+    message.addElementInt32("Min", linear->min);
+    message.addElementString("Error", linear->error);
+    message.addElementBoolean("Run", linear->run);
+    message.addElementBoolean("At Min", linear->at_min);
+    message.addElementBoolean("At Max", linear->at_max);
+
+    send(message);
+}
+
+
+void send(std::string messageLabel, const messages::msg::NeoOut::SharedPtr neo){
+    if(silentRunning)return;
+
+    BinaryMessage message(messageLabel);
+
+    message.addElementFloat32("Speed", neo->speed);
 
     send(message);
 }
@@ -349,7 +380,6 @@ void falcon4Callback(const messages::msg::TalonOut::SharedPtr talonOut){
     send("Falcon 4",talonOut);
 }
 
-
 /** @brief Receives the ZED camera image
  * 
  * This function hasn't been fully implemented yet.  In the future, this
@@ -358,6 +388,43 @@ void falcon4Callback(const messages::msg::TalonOut::SharedPtr talonOut){
  */
 void zedImageCallback(const sensor_msgs::msg::Image::SharedPtr inputImage){
     RCLCPP_INFO(nodeHandle->get_logger(), "Received image");
+}
+
+
+/** @brief Callback function for the LinearOut topic
+ * 
+ * This function receives the linearOut message published by the excavation
+ * node and uses the send data to send the data to the client side GUI.
+ * @param linearOut 
+ */
+void linearOut1Callback(const messages::msg::LinearOut::SharedPtr linearOut){
+    send("Linear 1", linearOut);
+}
+
+
+/** @brief Callback function for the LinearOut topic
+ * 
+ * This function receives the linearOut message published by the excavation
+ * node and uses the send data to send the data to the client side GUI.
+ * @param linearOut 
+ */
+void linearOut2Callback(const messages::msg::LinearOut::SharedPtr linearOut){
+    send("Linear 2", linearOut);
+}
+
+
+/** @brief Callback function for the LinearOut topic
+ * 
+ * This function receives the linearOut message published by the excavation
+ * node and uses the send data to send the data to the client side GUI.
+ * @param linearOut 
+ */
+void linearOut3Callback(const messages::msg::LinearOut::SharedPtr linearOut){
+    send("Linear 3", linearOut);
+}
+
+void neoOutCallback(const messages::msg::NeoOut::SharedPtr neoOut){
+    send("Neo", neoOut);
 }
 
 /** @brief Returns the address string of the rover.
@@ -513,11 +580,14 @@ int main(int argc, char **argv){
     auto powerSubscriber = nodeHandle->create_subscription<messages::msg::Power>("power",1,powerCallback);
     auto talon1Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("talon_14_info",1,talon1Callback);
     auto talon2Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("talon_15_info",1,talon2Callback);
-    auto falcon1Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("falcon_10_info",1,falcon1Callback);
-    auto falcon2Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("falcon_11_info",1,falcon2Callback);
-    auto falcon3Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("falcon_12_info",1,falcon3Callback);
-    auto falcon4Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("falcon_13_info",1,falcon4Callback);
-    
+    auto falcon1Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("talon_10_info",1,falcon1Callback);
+    auto falcon2Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("talon_11_info",1,falcon2Callback);
+    auto falcon3Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("talon_12_info",1,falcon3Callback);
+    auto falcon4Subscriber = nodeHandle->create_subscription<messages::msg::TalonOut>("talon_13_info",1,falcon4Callback);
+    auto linearOut1Subscriber = nodeHandle->create_subscription<messages::msg::LinearOut>("linearOut1",1,linearOut1Callback);
+    auto linearOut2Subscriber = nodeHandle->create_subscription<messages::msg::LinearOut>("linearOut2",1,linearOut2Callback);
+    auto linearOut3Subscriber = nodeHandle->create_subscription<messages::msg::LinearOut>("linearOut3",1,linearOut3Callback);
+    auto neoOutSubscriber = nodeHandle->create_subscription<messages::msg::NeoOut>("neo_out",1,neoOutCallback);
     auto zedPositionSubscriber = nodeHandle->create_subscription<messages::msg::ZedPosition>("zed_position",1,zedPositionCallback);
     auto zedImageSubscriber = nodeHandle->create_subscription<sensor_msgs::msg::Image>("zed_image", 10, zedImageCallback);
 

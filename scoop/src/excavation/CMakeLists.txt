@@ -18,16 +18,6 @@ add_executable(${PROJECT_NAME}_node
 	src/excavation_node.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}_node
-	libCTRE_Phoenix.a
-	libCTRE_PhoenixCCI.a
-	libCTRE_PhoenixPlatform_socketcan.a
-	libCTRE_PhoenixCanutils.a
-	libCTRE_PhoenixCore.a
-	libCTRE_PhoenixDiagnostics.a
-	libpthread.so
-)
-
 install(TARGETS ${PROJECT_NAME}_node
 	DESTINATION lib/${PROJECT_NAME}
 )

@@ -1,12 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
-project(autonomy)
+project(neo)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+	set(CMAKE_CXX_STANDARD 14)
 endif()
 
 find_package(ament_cmake REQUIRED)
@@ -19,7 +15,8 @@ include_directories(
 )
 
 add_executable(${PROJECT_NAME}_node
-	src/autonomy_node.cpp
+	src/neo_node.cpp
+	src/CANSparkMax.cpp
 )
 
 install(TARGETS ${PROJECT_NAME}_node
