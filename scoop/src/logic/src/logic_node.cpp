@@ -67,6 +67,7 @@ std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >
 std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > dumpPublisher;
 std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > neoPublisher;
 std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Bool_<std::allocator<void> >, std::allocator<void> > > automationGoPublisher;
+std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32_<std::allocator<void> >, std::allocator<void> > > ladderPublisher;
 
 
 /** @brief Function to initialize the motors to zero
@@ -141,11 +142,14 @@ void stopSpeed(){
  * */
 void updateExcavation(){
     std_msgs::msg::Float32 speed;
-    speed.data = -joystick1Pitch;
+    speed.data = joystick1Pitch;
     shoulderPublisher->publish(speed);
     std_msgs::msg::Float32 throttleSpeed;
     throttleSpeed.data = joystick1Throttle * 0.1;
     neoPublisher->publish(throttleSpeed);
+    std_msgs::msg::Float32 ladderSpeed;
+    ladderSpeed.data = joystick1Yaw;
+    ladderPublisher->publish(ladderSpeed);
 }
 
 /** @brief Function to stop excavation motors
@@ -218,7 +222,9 @@ void joystickAxisCallback(const messages::msg::AxisState::SharedPtr axisState){
     }
     else if(axisState->axis==2){
         joystick1Yaw = transformJoystickInfo(axisState->state, deadZone);
-
+        if(excavationGo){
+            updateExcavation();
+        }
     }
     else if(axisState->axis==3){
         joystick1Throttle = axisState->state/2 + 0.5;
@@ -348,6 +354,7 @@ void keyCallback(const messages::msg::KeyState::SharedPtr keyState){
         std_msgs::msg::Bool msg;
         msg.data = automationGo;
         automationGoPublisher->publish(msg);
+        automation->setGo();
         RCLCPP_INFO(nodeHandle->get_logger(), "Automation invert.  Current state: %d", automationGo);
     }
     if(keyState->key==45 && keyState->state==1){
@@ -399,6 +406,33 @@ void zedPositionCallback(const messages::msg::ZedPosition::SharedPtr zedPosition
 }
 
 
+/** @brief Callback function for the LinearOut topic
+ * 
+ * @param linearOut 
+ */
+void linearOut1Callback(const messages::msg::LinearOut::SharedPtr linearOut){
+    automation->setLinear1(linearOut);
+}
+
+
+/** @brief Callback function for the LinearOut topic
+ * 
+ * @param linearOut 
+ */
+void linearOut2Callback(const messages::msg::LinearOut::SharedPtr linearOut){
+    automation->setLinear2(linearOut);
+}
+
+
+/** @brief Callback function for the LinearOut topic
+ * 
+ * @param linearOut 
+ */
+void linearOut3Callback(const messages::msg::LinearOut::SharedPtr linearOut){
+    automation->setLinear3(linearOut);
+}
+
+
 int main(int argc, char **argv){
     rclcpp::init(argc,argv);
     nodeHandle = rclcpp::Node::make_shared("logic");
@@ -409,13 +443,18 @@ int main(int argc, char **argv){
     auto joystickHatSubscriber= nodeHandle->create_subscription<messages::msg::HatState>("joystick_hat",1,joystickHatCallback);
     auto keySubscriber= nodeHandle->create_subscription<messages::msg::KeyState>("key",1,keyCallback);
     auto zedPositionSubscriber= nodeHandle->create_subscription<messages::msg::ZedPosition>("zed_position",1,zedPositionCallback);
-    
+    auto linearOut1Subscriber = nodeHandle->create_subscription<messages::msg::LinearOut>("linearOut1",1,linearOut1Callback);
+    auto linearOut2Subscriber = nodeHandle->create_subscription<messages::msg::LinearOut>("linearOut2",1,linearOut2Callback);
+    auto linearOut3Subscriber = nodeHandle->create_subscription<messages::msg::LinearOut>("linearOut3",1,linearOut3Callback);
+
     driveLeftSpeedPublisher= nodeHandle->create_publisher<std_msgs::msg::Float32>("drive_left_speed",1);
     driveRightSpeedPublisher= nodeHandle->create_publisher<std_msgs::msg::Float32>("drive_right_speed",1);
     shoulderPublisher = nodeHandle->create_publisher<std_msgs::msg::Float32>("shoulder_speed",1);
     dumpPublisher = nodeHandle->create_publisher<std_msgs::msg::Float32>("dump_speed",1);
     neoPublisher = nodeHandle->create_publisher<std_msgs::msg::Float32>("neo_speed",1);
     automationGoPublisher = nodeHandle->create_publisher<std_msgs::msg::Bool>("automationGo",1);
+    ladderPublisher = nodeHandle->create_publisher<std_msgs::msg::Float32>("ladder_speed",1);
+
 
     initSetSpeed();
 
